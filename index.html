@@ -3,177 +3,335 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Estudio Llano</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<title>Rucoy Online Kingdom</title>
 <style>
   :root{
-    --bg:#fdfcf9;
-    --ink:#1c1b19;
-    --accent:#3d5a4c;
-    --line:#dedad2;
-    --muted:#6b675f;
+    --bg:#262626;
+    --panel:#2f2f2f;
+    --panel-2:#383838;
+    --line:#454545;
+    --ink:#f0eee9;
+    --muted:#a8a49c;
+    --accent:#c9a24b;
     box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px);
     padding-bottom:env(safe-area-inset-bottom,0px);
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --bg:#15140f;
-      --ink:#f3f1ea;
-      --accent:#8fb39f;
-      --line:#33312a;
-      --muted:#a6a196;
-    }
-  }
-  :root[data-theme="dark"]{
-    --bg:#15140f;
-    --ink:#f3f1ea;
-    --accent:#8fb39f;
-    --line:#33312a;
-    --muted:#a6a196;
-  }
   *{box-sizing:border-box;margin:0;padding:0}
-  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
   body{
+    height:100%;
     background:var(--bg);
     color:var(--ink);
-    font-family:Georgia,'Iowan Old Style',serif;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
+    font-family:"Press Start 2P",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    line-height:1.7;
   }
-  header{
-    padding:2.5rem 1.5rem 1.5rem;
+
+  /* --- pixel icon box: se ve bien igual si el png es 16x16 o 160x160 --- */
+  .icon-box{
     display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+  }
+  .icon-box img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    image-rendering:pixelated;
+    image-rendering:-moz-crisp-edges;
+    image-rendering:crisp-edges;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
     justify-content:space-between;
-    align-items:baseline;
+    padding:1rem 1.25rem;
     border-bottom:1px solid var(--line);
-    max-width:760px;
-    margin:0 auto;
+    position:sticky;
+    top:env(safe-area-inset-top,0px);
+    background:var(--bg);
+    z-index:10;
   }
-  header .brand{font-size:1.15rem;letter-spacing:.02em}
-  nav a{
-    color:var(--muted);
-    text-decoration:none;
-    font-family:-apple-system,Helvetica,Arial,sans-serif;
-    font-size:.9rem;
-    margin-left:1.25rem;
+  header .title{font-size:.7rem;letter-spacing:.02em}
+
+  .monster-btn{
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:.6rem .9rem .6rem .5rem;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:.6rem;
   }
-  nav a:hover, nav a:focus-visible{color:var(--accent)}
-  main{max-width:760px;margin:0 auto;padding:0 1.5rem}
-  .hero{padding:3.5rem 0 2.5rem}
-  .hero h1{
-    font-size:clamp(2rem,5vw,2.8rem);
-    font-weight:400;
-    line-height:1.15;
-    max-width:16ch;
-  }
-  .hero p{
-    margin-top:1.1rem;
-    color:var(--muted);
-    max-width:52ch;
-    font-size:1.05rem;
-  }
-  section{padding:2.5rem 0;border-top:1px solid var(--line)}
-  section h2{
-    font-size:1rem;
-    font-weight:400;
-    color:var(--muted);
-    font-family:-apple-system,Helvetica,Arial,sans-serif;
+  .monster-btn:hover{border-color:var(--accent)}
+  .monster-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .monster-btn .icon-box{width:34px;height:34px;flex:none;border-radius:6px}
+
+  main{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
+
+  #categoria-monstruos{display:none}
+  #categoria-monstruos.abierta{display:block}
+
+  .cat-header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
     margin-bottom:1rem;
   }
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
-  @media (max-width:520px){.grid{grid-template-columns:1fr}}
-  .grid article h3{font-size:1.15rem;font-weight:400;margin-bottom:.4rem}
-  .grid article p{color:var(--muted);font-size:.95rem}
-  form{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem}
-  input[type=email]{
-    flex:1;min-width:200px;
-    padding:.7rem .9rem;
+  .cat-header h2{font-size:.75rem;font-weight:400;color:var(--muted);text-transform:none}
+
+  .monster-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+    gap:1rem;
+  }
+  .monster-card{
+    background:var(--panel);
     border:1px solid var(--line);
-    background:transparent;
-    color:var(--ink);
-    font-family:inherit;
-    font-size:.95rem;
-  }
-  input[type=email]:focus-visible, button:focus-visible{
-    outline:2px solid var(--accent);
-    outline-offset:2px;
-  }
-  button{
-    padding:.7rem 1.4rem;
-    background:var(--accent);
-    color:var(--bg);
-    border:none;
-    font-family:-apple-system,Helvetica,Arial,sans-serif;
-    font-size:.9rem;
+    border-radius:12px;
+    padding:.85rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.55rem;
     cursor:pointer;
+    text-align:center;
   }
-  button:hover{opacity:.9}
-  footer{
-    max-width:760px;margin:0 auto;
-    padding:2rem 1.5rem 3rem;
+  .monster-card:hover, .monster-card:focus-visible{border-color:var(--accent);outline:none}
+  .monster-card .icon-box{width:72px;height:72px}
+  .monster-card .m-nombre{font-size:.62rem}
+  .monster-card .m-nivel{font-size:.55rem;color:var(--muted)}
+
+  /* --- modal --- */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.6);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:1.25rem;
+    z-index:100;
+  }
+  .overlay.abierta{display:flex}
+
+  .modal{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    max-width:420px;
+    width:100%;
+    max-height:calc(100% - 2rem);
+    overflow-y:auto;
+    padding:1.25rem;
+  }
+  .modal-top{
+    display:flex;
+    gap:1rem;
+    align-items:center;
+  }
+  .modal-top .icon-box{width:88px;height:88px;flex:none}
+  .modal-info h3{font-size:.75rem;line-height:1.5}
+  .modal-info .m-nivel{color:var(--muted);font-size:.6rem;margin-top:.5rem}
+
+  .modal-cerrar{
+    margin-left:auto;
+    background:none;
+    border:1px solid var(--line);
     color:var(--muted);
-    font-family:-apple-system,Helvetica,Arial,sans-serif;
-    font-size:.85rem;
-    display:flex;justify-content:space-between;
+    width:32px;height:32px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:1rem;
+    line-height:1;
   }
-  @media (prefers-reduced-motion: no-preference){
-    .hero h1{animation:rise .6s ease-out}
-    @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .modal-cerrar:hover{color:var(--ink);border-color:var(--accent)}
+
+  .drops h4{
+    margin-top:1.5rem;
+    margin-bottom:.7rem;
+    font-size:.62rem;
+    color:var(--muted);
+    font-weight:400;
+  }
+  .drop-list{display:flex;flex-direction:column;gap:.5rem}
+  .drop-item{
+    display:flex;
+    align-items:center;
+    gap:.7rem;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.45rem .6rem;
+  }
+  .drop-item .icon-box{width:36px;height:36px;flex:none;border-radius:6px}
+  .drop-item span{font-size:.6rem;line-height:1.5}
+
+  @media (max-width:480px){
+    .monster-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+    .monster-card .icon-box{width:60px;height:60px}
   }
 </style>
 </head>
 <body>
 
 <header>
-  <span class="brand">Estudio Llano</span>
-  <nav>
-    <a href="#trabajo">Trabajo</a>
-    <a href="#contacto">Contacto</a>
-  </nav>
+  <span class="title">Rucoy Online Kingdom</span>
+  <button class="monster-btn" id="btn-monstruos" aria-expanded="false" aria-controls="categoria-monstruos">
+    <span class="icon-box"><img src="monsterbutton.png" alt=""></span>
+    Monstruos
+  </button>
 </header>
 
 <main>
-  <div class="hero">
-    <h1>Diseño sereno para marcas que no necesitan gritar</h1>
-    <p>Somos un estudio pequeño que ayuda a negocios locales a tener una presencia clara y honesta en internet. Sin plantillas, sin relleno.</p>
-  </div>
-
-  <section id="trabajo">
-    <h2>Trabajo reciente</h2>
-    <div class="grid">
-      <article>
-        <h3>Panadería del Barrio</h3>
-        <p>Identidad de marca y sitio de una página para un negocio familiar de treinta años.</p>
-      </article>
-      <article>
-        <h3>Taller de cerámica Arena</h3>
-        <p>Catálogo simple con reserva de clases y galería de piezas.</p>
-      </article>
-      <article>
-        <h3>Librería Cauce</h3>
-        <p>Rediseño de señalética y sistema tipográfico para el local físico.</p>
-      </article>
-      <article>
-        <h3>Consultorio Dra. Reyes</h3>
-        <p>Página de citas con lenguaje claro, pensada para pacientes mayores.</p>
-      </article>
+  <section id="categoria-monstruos" aria-label="Categoría de monstruos">
+    <div class="cat-header">
+      <h2>Monstruos</h2>
     </div>
-  </section>
-
-  <section id="contacto">
-    <h2>Contacto</h2>
-    <p style="max-width:48ch">Cuéntanos brevemente qué necesitas y te respondemos en un par de días.</p>
-    <form onsubmit="event.preventDefault(); this.querySelector('button').textContent='Enviado';">
-      <input type="email" placeholder="tu@correo.com" required aria-label="Correo electrónico">
-      <button type="submit">Escribir</button>
-    </form>
+    <div class="monster-grid" id="monster-grid"></div>
   </section>
 </main>
 
-<footer>
-  <span>Estudio Llano</span>
-  <span>Madrid</span>
-</footer>
+<div class="overlay" id="overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-nombre">
+    <div class="modal-top">
+      <span class="icon-box"><img id="modal-img" src="" alt=""></span>
+      <div class="modal-info">
+        <h3 id="modal-nombre"></h3>
+        <div class="m-nivel" id="modal-nivel"></div>
+      </div>
+      <button class="modal-cerrar" id="btn-cerrar" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="drops">
+      <h4>Objetos que dropea</h4>
+      <div class="drop-list" id="modal-drops"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Datos de ejemplo: sustituye o amplía esta lista cuando tengas tus propios monstruos ---
+  const monstruos = [
+    {
+      nombre: "Slime",
+      nivel: 1,
+      icono: "monstruoname.png",
+      drops: [
+        { nombre: "Gel viscoso", icono: "itemdefault.png" },
+        { nombre: "Fragmento gelatinoso", icono: "itemdefault.png" },
+        { nombre: "Núcleo de slime", icono: "itemdefault.png" }
+      ]
+    },
+    {
+      nombre: "Goblin",
+      nivel: 3,
+      icono: "monstruoname.png",
+      drops: [
+        { nombre: "Daga oxidada", icono: "itemdefault.png" },
+        { nombre: "Oreja de goblin", icono: "itemdefault.png" },
+        { nombre: "Moneda de cobre", icono: "itemdefault.png" }
+      ]
+    },
+    {
+      nombre: "Esqueleto",
+      nivel: 5,
+      icono: "monstruoname.png",
+      drops: [
+        { nombre: "Hueso", icono: "itemdefault.png" },
+        { nombre: "Espada rota", icono: "itemdefault.png" },
+        { nombre: "Cráneo", icono: "itemdefault.png" }
+      ]
+    },
+    {
+      nombre: "Araña gigante",
+      nivel: 7,
+      icono: "monstruoname.png",
+      drops: [
+        { nombre: "Seda de araña", icono: "itemdefault.png" },
+        { nombre: "Colmillo venenoso", icono: "itemdefault.png" },
+        { nombre: "Ojo compuesto", icono: "itemdefault.png" }
+      ]
+    },
+    {
+      nombre: "Dragón joven",
+      nivel: 15,
+      icono: "monstruoname.png",
+      drops: [
+        { nombre: "Escama de dragón", icono: "itemdefault.png" },
+        { nombre: "Garra afilada", icono: "itemdefault.png" },
+        { nombre: "Aliento embotellado", icono: "itemdefault.png" }
+      ]
+    }
+  ];
+
+  const grid = document.getElementById("monster-grid");
+  const btnMonstruos = document.getElementById("btn-monstruos");
+  const categoria = document.getElementById("categoria-monstruos");
+  const overlay = document.getElementById("overlay");
+  const btnCerrar = document.getElementById("btn-cerrar");
+
+  function renderGrid(){
+    grid.innerHTML = "";
+    monstruos.forEach((m, i) => {
+      const card = document.createElement("button");
+      card.className = "monster-card";
+      card.innerHTML = `
+        <span class="icon-box"><img src="${m.icono}" alt=""></span>
+        <span class="m-nombre">${m.nombre}</span>
+        <span class="m-nivel">Nivel ${m.nivel}</span>
+      `;
+      card.addEventListener("click", () => abrirModal(i));
+      grid.appendChild(card);
+    });
+  }
+
+  function abrirModal(i){
+    const m = monstruos[i];
+    document.getElementById("modal-img").src = m.icono;
+    document.getElementById("modal-nombre").textContent = m.nombre;
+    document.getElementById("modal-nivel").textContent = "Nivel " + m.nivel;
+
+    const dropsBox = document.getElementById("modal-drops");
+    dropsBox.innerHTML = "";
+    m.drops.forEach(d => {
+      const row = document.createElement("div");
+      row.className = "drop-item";
+      row.innerHTML = `
+        <span class="icon-box"><img src="${d.icono}" alt=""></span>
+        <span>${d.nombre}</span>
+      `;
+      dropsBox.appendChild(row);
+    });
+
+    overlay.classList.add("abierta");
+  }
+
+  function cerrarModal(){
+    overlay.classList.remove("abierta");
+  }
+
+  btnMonstruos.addEventListener("click", () => {
+    const abierta = categoria.classList.toggle("abierta");
+    btnMonstruos.setAttribute("aria-expanded", abierta);
+  });
+
+  btnCerrar.addEventListener("click", cerrarModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) cerrarModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarModal(); });
+
+  renderGrid();
+</script>
 
 </body>
 </html>
