@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Estudio Llano</title>
+<style>
+  :root{
+    --bg:#fdfcf9;
+    --ink:#1c1b19;
+    --accent:#3d5a4c;
+    --line:#dedad2;
+    --muted:#6b675f;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15140f;
+      --ink:#f3f1ea;
+      --accent:#8fb39f;
+      --line:#33312a;
+      --muted:#a6a196;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#15140f;
+    --ink:#f3f1ea;
+    --accent:#8fb39f;
+    --line:#33312a;
+    --muted:#a6a196;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:Georgia,'Iowan Old Style',serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  header{
+    padding:2.5rem 1.5rem 1.5rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    border-bottom:1px solid var(--line);
+    max-width:760px;
+    margin:0 auto;
+  }
+  header .brand{font-size:1.15rem;letter-spacing:.02em}
+  nav a{
+    color:var(--muted);
+    text-decoration:none;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:.9rem;
+    margin-left:1.25rem;
+  }
+  nav a:hover, nav a:focus-visible{color:var(--accent)}
+  main{max-width:760px;margin:0 auto;padding:0 1.5rem}
+  .hero{padding:3.5rem 0 2.5rem}
+  .hero h1{
+    font-size:clamp(2rem,5vw,2.8rem);
+    font-weight:400;
+    line-height:1.15;
+    max-width:16ch;
+  }
+  .hero p{
+    margin-top:1.1rem;
+    color:var(--muted);
+    max-width:52ch;
+    font-size:1.05rem;
+  }
+  section{padding:2.5rem 0;border-top:1px solid var(--line)}
+  section h2{
+    font-size:1rem;
+    font-weight:400;
+    color:var(--muted);
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    margin-bottom:1rem;
+  }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+  @media (max-width:520px){.grid{grid-template-columns:1fr}}
+  .grid article h3{font-size:1.15rem;font-weight:400;margin-bottom:.4rem}
+  .grid article p{color:var(--muted);font-size:.95rem}
+  form{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem}
+  input[type=email]{
+    flex:1;min-width:200px;
+    padding:.7rem .9rem;
+    border:1px solid var(--line);
+    background:transparent;
+    color:var(--ink);
+    font-family:inherit;
+    font-size:.95rem;
+  }
+  input[type=email]:focus-visible, button:focus-visible{
+    outline:2px solid var(--accent);
+    outline-offset:2px;
+  }
+  button{
+    padding:.7rem 1.4rem;
+    background:var(--accent);
+    color:var(--bg);
+    border:none;
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:.9rem;
+    cursor:pointer;
+  }
+  button:hover{opacity:.9}
+  footer{
+    max-width:760px;margin:0 auto;
+    padding:2rem 1.5rem 3rem;
+    color:var(--muted);
+    font-family:-apple-system,Helvetica,Arial,sans-serif;
+    font-size:.85rem;
+    display:flex;justify-content:space-between;
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .hero h1{animation:rise .6s ease-out}
+    @keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">Estudio Llano</span>
+  <nav>
+    <a href="#trabajo">Trabajo</a>
+    <a href="#contacto">Contacto</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Diseño sereno para marcas que no necesitan gritar</h1>
+    <p>Somos un estudio pequeño que ayuda a negocios locales a tener una presencia clara y honesta en internet. Sin plantillas, sin relleno.</p>
+  </div>
+
+  <section id="trabajo">
+    <h2>Trabajo reciente</h2>
+    <div class="grid">
+      <article>
+        <h3>Panadería del Barrio</h3>
+        <p>Identidad de marca y sitio de una página para un negocio familiar de treinta años.</p>
+      </article>
+      <article>
+        <h3>Taller de cerámica Arena</h3>
+        <p>Catálogo simple con reserva de clases y galería de piezas.</p>
+      </article>
+      <article>
+        <h3>Librería Cauce</h3>
+        <p>Rediseño de señalética y sistema tipográfico para el local físico.</p>
+      </article>
+      <article>
+        <h3>Consultorio Dra. Reyes</h3>
+        <p>Página de citas con lenguaje claro, pensada para pacientes mayores.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="contacto">
+    <h2>Contacto</h2>
+    <p style="max-width:48ch">Cuéntanos brevemente qué necesitas y te respondemos en un par de días.</p>
+    <form onsubmit="event.preventDefault(); this.querySelector('button').textContent='Enviado';">
+      <input type="email" placeholder="tu@correo.com" required aria-label="Correo electrónico">
+      <button type="submit">Escribir</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <span>Estudio Llano</span>
+  <span>Madrid</span>
+</footer>
+
+</body>
+</html>
