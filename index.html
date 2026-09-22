@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -31,7 +31,7 @@
     line-height:1.7;
   }
 
-  /* --- pixel icon box: se ve bien igual si el png es 16x16 o 160x160 --- */
+  /* --- pixel icon box: looks right whether the png is 16x16 or 160x160 --- */
   .icon-box{
     display:flex;
     align-items:center;
@@ -81,8 +81,47 @@
 
   main{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
 
-  #categoria-monstruos{display:none}
-  #categoria-monstruos.abierta{display:block}
+  /* --- hint shown before anything is opened, cycling through the header options --- */
+  #hint{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1.5rem;
+    text-align:center;
+    padding:4rem 1rem 3.5rem;
+  }
+  #hint p{
+    font-size:.7rem;
+    color:var(--muted);
+    line-height:1.8;
+    max-width:26ch;
+  }
+  #hint-carousel{
+    position:relative;
+    height:52px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hint-chip{
+    position:absolute;
+    display:flex;
+    align-items:center;
+    gap:.6rem;
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:.6rem .9rem .6rem .5rem;
+    border-radius:10px;
+    font-size:.6rem;
+    opacity:0;
+    transition:opacity .35s ease;
+    pointer-events:none;
+  }
+  .hint-chip.visible{opacity:1}
+  .hint-chip .icon-box{width:34px;height:34px;flex:none;border-radius:6px}
+
+  #monster-category{display:none}
+  #monster-category.open{display:block}
 
   .cat-header{
     display:flex;
@@ -111,8 +150,8 @@
   }
   .monster-card:hover, .monster-card:focus-visible{border-color:var(--accent);outline:none}
   .monster-card .icon-box{width:72px;height:72px}
-  .monster-card .m-nombre{font-size:.62rem}
-  .monster-card .m-nivel{font-size:.55rem;color:var(--muted)}
+  .monster-card .m-name{font-size:.62rem}
+  .monster-card .m-level{font-size:.55rem;color:var(--muted)}
 
   /* --- modal --- */
   .overlay{
@@ -124,7 +163,7 @@
     padding:1.25rem;
     z-index:100;
   }
-  .overlay.abierta{display:flex}
+  .overlay.open{display:flex}
 
   .modal{
     background:var(--panel);
@@ -143,9 +182,9 @@
   }
   .modal-top .icon-box{width:88px;height:88px;flex:none}
   .modal-info h3{font-size:.75rem;line-height:1.5}
-  .modal-info .m-nivel{color:var(--muted);font-size:.6rem;margin-top:.5rem}
+  .modal-info .m-level{color:var(--muted);font-size:.6rem;margin-top:.5rem}
 
-  .modal-cerrar{
+  .modal-close{
     margin-left:auto;
     background:none;
     border:1px solid var(--line);
@@ -156,7 +195,7 @@
     font-size:1rem;
     line-height:1;
   }
-  .modal-cerrar:hover{color:var(--ink);border-color:var(--accent)}
+  .modal-close:hover{color:var(--ink);border-color:var(--accent)}
 
   .drops h4{
     margin-top:1.5rem;
@@ -188,119 +227,125 @@
 
 <header>
   <span class="title">Rucoy Online Kingdom</span>
-  <button class="monster-btn" id="btn-monstruos" aria-expanded="false" aria-controls="categoria-monstruos">
+  <button class="monster-btn" id="btn-monsters" aria-expanded="false" aria-controls="monster-category">
     <span class="icon-box"><img src="monsterbutton.png" alt=""></span>
-    Monstruos
+    Monsters
   </button>
 </header>
 
 <main>
-  <section id="categoria-monstruos" aria-label="Categoría de monstruos">
+  <div id="hint">
+    <p>Select one of the options above</p>
+    <div id="hint-carousel"></div>
+  </div>
+
+  <section id="monster-category" aria-label="Monsters category">
     <div class="cat-header">
-      <h2>Monstruos</h2>
+      <h2>Monsters</h2>
     </div>
     <div class="monster-grid" id="monster-grid"></div>
   </section>
 </main>
 
 <div class="overlay" id="overlay">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-nombre">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-name">
     <div class="modal-top">
       <span class="icon-box"><img id="modal-img" src="" alt=""></span>
       <div class="modal-info">
-        <h3 id="modal-nombre"></h3>
-        <div class="m-nivel" id="modal-nivel"></div>
+        <h3 id="modal-name"></h3>
+        <div class="m-level" id="modal-level"></div>
       </div>
-      <button class="modal-cerrar" id="btn-cerrar" aria-label="Cerrar">✕</button>
+      <button class="modal-close" id="btn-close" aria-label="Close">✕</button>
     </div>
     <div class="drops">
-      <h4>Objetos que dropea</h4>
+      <h4>Drops</h4>
       <div class="drop-list" id="modal-drops"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // --- Datos de ejemplo: sustituye o amplía esta lista cuando tengas tus propios monstruos ---
-  const monstruos = [
+  // --- Sample data: replace or extend this list once you have your own monsters ---
+  const monsters = [
     {
-      nombre: "Slime",
-      nivel: 1,
-      icono: "monstruoname.png",
+      name: "Slime",
+      level: 1,
+      icon: "monstruoname.png",
       drops: [
-        { nombre: "Gel viscoso", icono: "itemdefault.png" },
-        { nombre: "Fragmento gelatinoso", icono: "itemdefault.png" },
-        { nombre: "Núcleo de slime", icono: "itemdefault.png" }
+        { name: "Sticky Gel", icon: "itemdefault.png" },
+        { name: "Gelatinous Chunk", icon: "itemdefault.png" },
+        { name: "Slime Core", icon: "itemdefault.png" }
       ]
     },
     {
-      nombre: "Goblin",
-      nivel: 3,
-      icono: "monstruoname.png",
+      name: "Goblin",
+      level: 3,
+      icon: "monstruoname.png",
       drops: [
-        { nombre: "Daga oxidada", icono: "itemdefault.png" },
-        { nombre: "Oreja de goblin", icono: "itemdefault.png" },
-        { nombre: "Moneda de cobre", icono: "itemdefault.png" }
+        { name: "Rusty Dagger", icon: "itemdefault.png" },
+        { name: "Goblin Ear", icon: "itemdefault.png" },
+        { name: "Copper Coin", icon: "itemdefault.png" }
       ]
     },
     {
-      nombre: "Esqueleto",
-      nivel: 5,
-      icono: "monstruoname.png",
+      name: "Skeleton",
+      level: 5,
+      icon: "monstruoname.png",
       drops: [
-        { nombre: "Hueso", icono: "itemdefault.png" },
-        { nombre: "Espada rota", icono: "itemdefault.png" },
-        { nombre: "Cráneo", icono: "itemdefault.png" }
+        { name: "Bone", icon: "itemdefault.png" },
+        { name: "Broken Sword", icon: "itemdefault.png" },
+        { name: "Skull", icon: "itemdefault.png" }
       ]
     },
     {
-      nombre: "Araña gigante",
-      nivel: 7,
-      icono: "monstruoname.png",
+      name: "Giant Spider",
+      level: 7,
+      icon: "monstruoname.png",
       drops: [
-        { nombre: "Seda de araña", icono: "itemdefault.png" },
-        { nombre: "Colmillo venenoso", icono: "itemdefault.png" },
-        { nombre: "Ojo compuesto", icono: "itemdefault.png" }
+        { name: "Spider Silk", icon: "itemdefault.png" },
+        { name: "Venom Fang", icon: "itemdefault.png" },
+        { name: "Compound Eye", icon: "itemdefault.png" }
       ]
     },
     {
-      nombre: "Dragón joven",
-      nivel: 15,
-      icono: "monstruoname.png",
+      name: "Young Dragon",
+      level: 15,
+      icon: "monstruoname.png",
       drops: [
-        { nombre: "Escama de dragón", icono: "itemdefault.png" },
-        { nombre: "Garra afilada", icono: "itemdefault.png" },
-        { nombre: "Aliento embotellado", icono: "itemdefault.png" }
+        { name: "Dragon Scale", icon: "itemdefault.png" },
+        { name: "Sharp Claw", icon: "itemdefault.png" },
+        { name: "Bottled Breath", icon: "itemdefault.png" }
       ]
     }
   ];
 
   const grid = document.getElementById("monster-grid");
-  const btnMonstruos = document.getElementById("btn-monstruos");
-  const categoria = document.getElementById("categoria-monstruos");
+  const btnMonsters = document.getElementById("btn-monsters");
+  const category = document.getElementById("monster-category");
   const overlay = document.getElementById("overlay");
-  const btnCerrar = document.getElementById("btn-cerrar");
+  const btnClose = document.getElementById("btn-close");
+  const hint = document.getElementById("hint");
 
   function renderGrid(){
     grid.innerHTML = "";
-    monstruos.forEach((m, i) => {
+    monsters.forEach((m, i) => {
       const card = document.createElement("button");
       card.className = "monster-card";
       card.innerHTML = `
-        <span class="icon-box"><img src="${m.icono}" alt=""></span>
-        <span class="m-nombre">${m.nombre}</span>
-        <span class="m-nivel">Nivel ${m.nivel}</span>
+        <span class="icon-box"><img src="${m.icon}" alt=""></span>
+        <span class="m-name">${m.name}</span>
+        <span class="m-level">Level ${m.level}</span>
       `;
-      card.addEventListener("click", () => abrirModal(i));
+      card.addEventListener("click", () => openModal(i));
       grid.appendChild(card);
     });
   }
 
-  function abrirModal(i){
-    const m = monstruos[i];
-    document.getElementById("modal-img").src = m.icono;
-    document.getElementById("modal-nombre").textContent = m.nombre;
-    document.getElementById("modal-nivel").textContent = "Nivel " + m.nivel;
+  function openModal(i){
+    const m = monsters[i];
+    document.getElementById("modal-img").src = m.icon;
+    document.getElementById("modal-name").textContent = m.name;
+    document.getElementById("modal-level").textContent = "Level " + m.level;
 
     const dropsBox = document.getElementById("modal-drops");
     dropsBox.innerHTML = "";
@@ -308,29 +353,69 @@
       const row = document.createElement("div");
       row.className = "drop-item";
       row.innerHTML = `
-        <span class="icon-box"><img src="${d.icono}" alt=""></span>
-        <span>${d.nombre}</span>
+        <span class="icon-box"><img src="${d.icon}" alt=""></span>
+        <span>${d.name}</span>
       `;
       dropsBox.appendChild(row);
     });
 
-    overlay.classList.add("abierta");
+    overlay.classList.add("open");
   }
 
-  function cerrarModal(){
-    overlay.classList.remove("abierta");
+  function closeModal(){
+    overlay.classList.remove("open");
   }
 
-  btnMonstruos.addEventListener("click", () => {
-    const abierta = categoria.classList.toggle("abierta");
-    btnMonstruos.setAttribute("aria-expanded", abierta);
+  btnMonsters.addEventListener("click", () => {
+    const isOpen = category.classList.toggle("open");
+    btnMonsters.setAttribute("aria-expanded", isOpen);
+    // hide the "pick an option" hint once something is actually open
+    hint.style.display = isOpen ? "none" : "flex";
   });
 
-  btnCerrar.addEventListener("click", cerrarModal);
-  overlay.addEventListener("click", (e) => { if (e.target === overlay) cerrarModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarModal(); });
+  btnClose.addEventListener("click", closeModal);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
   renderGrid();
+
+  /* =========================================================
+     Hint carousel: cycles through the top-bar options one at a
+     time, on a loop, so people know what's clickable up there.
+     Add more entries here whenever a new button is added to the
+     header — the carousel picks them up automatically.
+     ========================================================= */
+  const hintOptions = [
+    { icon: "monsterbutton.png", label: "Monsters" }
+    // { icon: "nextbutton.png", label: "Next option" },  <- add future buttons like this
+  ];
+
+  const carousel = document.getElementById("hint-carousel");
+  const chips = hintOptions.map(opt => {
+    const chip = document.createElement("div");
+    chip.className = "hint-chip";
+    chip.innerHTML = `
+      <span class="icon-box"><img src="${opt.icon}" alt=""></span>
+      <span>${opt.label}</span>
+    `;
+    carousel.appendChild(chip);
+    return chip;
+  });
+
+  const SHOW_MS = 1800;
+  const GAP_MS = 400;
+  let hintIndex = -1;
+
+  function cycleHint(){
+    if(chips.length === 0) return;
+    if(hintIndex >= 0) chips[hintIndex].classList.remove("visible");
+    hintIndex = (hintIndex + 1) % chips.length;
+    setTimeout(() => {
+      chips[hintIndex].classList.add("visible");
+      setTimeout(cycleHint, SHOW_MS);
+    }, GAP_MS);
+  }
+  cycleHint();
 </script>
 
 </body>
