@@ -31,8 +31,9 @@
     line-height:1.7;
   }
 
-  /* --- pixel icon box: looks right whether the png is 16x16 or 160x160 --- */
+  /* --- icon box: holds either a plain png or a cropped sprite-sheet cell --- */
   .icon-box{
+    position:relative;
     display:flex;
     align-items:center;
     justify-content:center;
@@ -49,21 +50,42 @@
     image-rendering:-moz-crisp-edges;
     image-rendering:crisp-edges;
   }
+  /* a single cell cropped out of monsterlist.png, positioned/sized by JS */
+  .icon-box img.sprite-icon{
+    position:absolute;
+    width:auto;
+    height:auto;
+    max-width:none;
+    object-fit:fill;
+  }
 
-  header{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:1rem 1.25rem;
-    border-bottom:1px solid var(--line);
+  .topbar{
     position:sticky;
     top:env(safe-area-inset-top,0px);
     background:var(--bg);
     z-index:10;
   }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:.9rem 1rem;
+    border-bottom:1px solid var(--line);
+  }
   header .title{font-size:.7rem;letter-spacing:.02em}
 
-  .monster-btn{
+  /* row of top-level buttons — add more here later */
+  .toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.6rem;
+    padding:.6rem .9rem;
+    border-bottom:1px solid var(--line);
+    overflow-x:auto;
+  }
+  .toolbar-btn{
     display:flex;
     align-items:center;
     gap:.6rem;
@@ -74,14 +96,16 @@
     border-radius:10px;
     cursor:pointer;
     font-size:.6rem;
+    flex:none;
   }
-  .monster-btn:hover{border-color:var(--accent)}
-  .monster-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-  .monster-btn .icon-box{width:34px;height:34px;flex:none;border-radius:6px}
+  .toolbar-btn:hover{border-color:var(--accent)}
+  .toolbar-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .toolbar-btn.active{border-color:var(--accent)}
+  .toolbar-btn .icon-box{width:34px;height:34px;flex:none;border-radius:6px}
 
   main{max-width:960px;margin:0 auto;padding:1.5rem 1.25rem 3rem}
 
-  /* --- hint shown before anything is opened, cycling through the header options --- */
+  /* --- hint shown before anything is opened, cycling through the top options --- */
   #hint{
     display:flex;
     flex-direction:column;
@@ -120,23 +144,25 @@
   .hint-chip.visible{opacity:1}
   .hint-chip .icon-box{width:34px;height:34px;flex:none;border-radius:6px}
 
-  #monster-category{display:none}
-  #monster-category.open{display:block}
+  .panel{display:none}
+  .panel.open{display:block}
 
-  .cat-header{
-    display:flex;
-    align-items:baseline;
-    justify-content:space-between;
-    margin-bottom:1rem;
+  .cat-header{margin-bottom:1rem}
+  .cat-header h2{font-size:.75rem;font-weight:400;color:var(--muted)}
+
+  .group-title{
+    font-size:.6rem;
+    color:var(--accent);
+    margin:1.75rem 0 .9rem;
   }
-  .cat-header h2{font-size:.75rem;font-weight:400;color:var(--muted);text-transform:none}
+  .group-title:first-of-type{margin-top:0}
 
-  .monster-grid{
+  .entity-grid{
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
     gap:1rem;
   }
-  .monster-card{
+  .entity-card{
     background:var(--panel);
     border:1px solid var(--line);
     border-radius:12px;
@@ -148,10 +174,10 @@
     cursor:pointer;
     text-align:center;
   }
-  .monster-card:hover, .monster-card:focus-visible{border-color:var(--accent);outline:none}
-  .monster-card .icon-box{width:72px;height:72px}
-  .monster-card .m-name{font-size:.62rem}
-  .monster-card .m-level{font-size:.55rem;color:var(--muted)}
+  .entity-card:hover, .entity-card:focus-visible{border-color:var(--accent);outline:none}
+  .entity-card .icon-box{width:72px;height:72px}
+  .entity-card .e-name{font-size:.6rem}
+  .entity-card .e-level{font-size:.55rem;color:var(--muted)}
 
   /* --- modal --- */
   .overlay{
@@ -181,6 +207,7 @@
     align-items:center;
   }
   .modal-top .icon-box{width:88px;height:88px;flex:none}
+  .modal-info{min-width:0;flex:1}
   .modal-info h3{font-size:.75rem;line-height:1.5}
   .modal-info .m-level{color:var(--muted);font-size:.6rem;margin-top:.5rem}
 
@@ -194,9 +221,12 @@
     cursor:pointer;
     font-size:1rem;
     line-height:1;
+    flex:none;
   }
   .modal-close:hover{color:var(--ink);border-color:var(--accent)}
 
+  .drops{display:none}
+  .drops.has-items{display:block}
   .drops h4{
     margin-top:1.5rem;
     margin-bottom:.7rem;
@@ -218,20 +248,30 @@
   .drop-item span{font-size:.6rem;line-height:1.5}
 
   @media (max-width:480px){
-    .monster-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
-    .monster-card .icon-box{width:60px;height:60px}
+    .entity-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+    .entity-card .icon-box{width:60px;height:60px}
   }
 </style>
 </head>
 <body>
 
-<header>
-  <span class="title">Rucoy Online Kingdom</span>
-  <button class="monster-btn" id="btn-monsters" aria-expanded="false" aria-controls="monster-category">
-    <span class="icon-box"><img src="monsterbutton.png" alt=""></span>
-    Monsters
-  </button>
-</header>
+<div class="topbar">
+  <header>
+    <span class="title">Rucoy Online Kingdom</span>
+  </header>
+
+  <!-- top-level sections — add more buttons here later -->
+  <div class="toolbar">
+    <button class="toolbar-btn" data-panel="monsters-panel" aria-expanded="false">
+      <span class="icon-box"><img src="monsterbutton.png" alt=""></span>
+      Monsters
+    </button>
+    <button class="toolbar-btn" data-panel="bosses-panel" aria-expanded="false">
+      <span class="icon-box"><img src="bossicon.png" alt=""></span>
+      Bosses
+    </button>
+  </div>
+</div>
 
 <main>
   <div id="hint">
@@ -239,25 +279,28 @@
     <div id="hint-carousel"></div>
   </div>
 
-  <section id="monster-category" aria-label="Monsters category">
-    <div class="cat-header">
-      <h2>Monsters</h2>
-    </div>
-    <div class="monster-grid" id="monster-grid"></div>
+  <section id="monsters-panel" class="panel" aria-label="Monsters">
+    <div class="cat-header"><h2>Monsters</h2></div>
+    <div class="entity-grid" id="monsters-grid"></div>
+  </section>
+
+  <section id="bosses-panel" class="panel" aria-label="Bosses">
+    <div class="cat-header"><h2>Bosses</h2></div>
+    <div id="bosses-groups"></div>
   </section>
 </main>
 
 <div class="overlay" id="overlay">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-name">
     <div class="modal-top">
-      <span class="icon-box"><img id="modal-img" src="" alt=""></span>
+      <span class="icon-box" id="modal-icon"></span>
       <div class="modal-info">
         <h3 id="modal-name"></h3>
         <div class="m-level" id="modal-level"></div>
       </div>
       <button class="modal-close" id="btn-close" aria-label="Close">✕</button>
     </div>
-    <div class="drops">
+    <div class="drops" id="modal-drops-wrap">
       <h4>Drops</h4>
       <div class="drop-list" id="modal-drops"></div>
     </div>
@@ -265,129 +308,333 @@
 </div>
 
 <script>
-  // --- Sample data: replace or extend this list once you have your own monsters ---
+  /* =========================================================
+     Sprite sheet (monsterlist.png)
+     Every monster/boss icon is one cell cropped out of this
+     single image, instead of a separate png per creature.
+
+     DEFAULT_CELL: the grid size used unless an entry says
+     otherwise (your mob list uses a 32x32 grid). A few boss
+     entries were built on a different grid (48x48) — those set
+     their own `cell` and override the default just for them.
+
+     Coordinates are { row, col }, both 0-indexed: row 0 / col 0
+     is the top-left cell of the sheet.
+     ========================================================= */
+  const SPRITE_SHEET = "monsterlist.png";
+  const DEFAULT_CELL = 32;
+
+  // --- Monsters (32x32 grid) ---
   const monsters = [
+    { name: "Crab",                 level: 1,   icon: { row: 0,  col: 0 } },
+    { name: "Rat",                  level: 1,   icon: { row: 1,  col: 0 } },
+    { name: "Rat",                  level: 3,   icon: { row: 2,  col: 0 } },
+    { name: "Crow",                 level: 6,   icon: { row: 3,  col: 0 } },
+    { name: "Wolf",                 level: 9,   icon: { row: 4,  col: 0 } },
+    { name: "Scorpion",             level: 12,  icon: { row: 5,  col: 0 } },
+    { name: "Cobra",                level: 13,  icon: { row: 6,  col: 0 } },
+    { name: "Worm",                 level: 14,  icon: { row: 7,  col: 0 } },
+    { name: "Goblin",               level: 15,  icon: { row: 8,  col: 0 } },
+    { name: "Mummy",                level: 25,  icon: { row: 9,  col: 0 } },
+    { name: "Pharaon",              level: 35,  icon: { row: 10, col: 0 } },
+    { name: "Assassin",             level: 40,  icon: { row: 0,  col: 2 } },
+    { name: "Assassin",             level: 45,  icon: { row: 0,  col: 1 } },
+    { name: "Assassin Ninja",       level: 50,  icon: { row: 0,  col: 3 } },
+    { name: "Zombie",               level: 65,  icon: { row: 1,  col: 1 } },
+    { name: "Headless Zombie",      level: 65,  icon: { row: 1,  col: 2 } },
+    { name: "Skeleton",             level: 75,  icon: { row: 2,  col: 1 } },
+    { name: "Skeleton Archer",      level: 80,  icon: { row: 2,  col: 2 } },
+    { name: "Skeleton Warrior",     level: 90,  icon: { row: 2,  col: 3 } },
+    { name: "Vampire",              level: 100, icon: { row: 3,  col: 1 } },
+    { name: "Vampire",              level: 110, icon: { row: 3,  col: 2 } },
+    { name: "Drow Assassin",        level: 120, icon: { row: 4,  col: 1 } },
+    { name: "Drow Ranger",          level: 125, icon: { row: 4,  col: 2 } },
+    { name: "Drow Mage",            level: 130, icon: { row: 5,  col: 2 } },
+    { name: "Drow Fighter",         level: 135, icon: { row: 5,  col: 1 } },
+    { name: "Drow Sorceress",       level: 140, icon: { row: 5,  col: 3 } },
+    { name: "Lizard Warrior",       level: 150, icon: { row: 6,  col: 2 } },
+    { name: "Lizard Archer",        level: 160, icon: { row: 6,  col: 1 } },
+    { name: "Lizard Shaman",        level: 170, icon: { row: 7,  col: 1 } },
+    { name: "Lizard Captain",       level: 180, icon: { row: 8,  col: 2 } },
+    { name: "Lizard High Shaman",   level: 190, icon: { row: 8,  col: 3 } },
+    { name: "Djinn",                level: 150, icon: { row: 9,  col: 2 } },
+    { name: "Dead Eye",             level: 170, icon: { row: 9,  col: 1 } },
+    { name: "Gargoyle",             level: 190, icon: { row: 10, col: 2 } },
+    { name: "Minotaur",             level: 225, icon: { row: 11, col: 0 } },
+    { name: "Minotaur",             level: 250, icon: { row: 11, col: 1 } },
+    { name: "Minotaur",             level: 275, icon: { row: 11, col: 2 } },
+    { name: "Dragon Hatchling",     level: 225, icon: { row: 12, col: 0 } },
+    { name: "Dragon",               level: 250, icon: { row: 12, col: 1 } },
+    { name: "Dragon Warden",        level: 280, icon: { row: 12, col: 2 } },
+    { name: "Ice Elemental",        level: 300, icon: { row: 13, col: 1 } },
+    { name: "Ice Dragon",           level: 325, icon: { row: 13, col: 0 } },
+    { name: "Yeti",                 level: 350, icon: { row: 13, col: 2 } },
+    { name: "Lava Golem",           level: 375, icon: { row: 14, col: 1 } },
+    { name: "Orthrus",              level: 400, icon: { row: 14, col: 2 } },
+    { name: "Demon",                level: 450, icon: { row: 14, col: 0 } }
+  ];
+
+  // --- Bosses, grouped. Same 32x32 grid unless an entry sets its own `cell`. ---
+  const bossGroups = [
     {
-      name: "Slime",
-      level: 1,
-      icon: "monstruoname.png",
-      drops: [
-        { name: "Sticky Gel", icon: "itemdefault.png" },
-        { name: "Gelatinous Chunk", icon: "itemdefault.png" },
-        { name: "Slime Core", icon: "itemdefault.png" }
+      title: "Normal Bosses",
+      bosses: [
+        { name: "Vampire King",     icon: { row: 3,  col: 3 } },
+        { name: "Drow Queen",       icon: { row: 5,  col: 4 } },
+        { name: "General Krinok",   icon: { row: 9,  col: 4 } },
+        { name: "Gargoyle",         icon: { row: 10, col: 3 } },
+        { name: "Zarron Bravehorn", icon: { row: 11, col: 3 } },
+        { name: "Cerberus",         icon: { row: 14, col: 3 } }
       ]
     },
     {
-      name: "Goblin",
-      level: 3,
-      icon: "monstruoname.png",
-      drops: [
-        { name: "Rusty Dagger", icon: "itemdefault.png" },
-        { name: "Goblin Ear", icon: "itemdefault.png" },
-        { name: "Copper Coin", icon: "itemdefault.png" }
+      title: "Uncommon Bosses",
+      bosses: [
+        { name: "Slime Lord",       icon: { row: 16, col: 0 } },
+        { name: "Goblin Lord",      icon: { row: 8,  col: 1 } },
+        { name: "Kamon The Cursed", icon: { row: 10, col: 1 } }
       ]
     },
     {
-      name: "Skeleton",
-      level: 5,
-      icon: "monstruoname.png",
-      drops: [
-        { name: "Bone", icon: "itemdefault.png" },
-        { name: "Broken Sword", icon: "itemdefault.png" },
-        { name: "Skull", icon: "itemdefault.png" }
+      title: "Christmas Bosses",
+      bosses: [
+        { name: "Evil Santa",    icon: { row: 16, col: 1 } },
+        { name: "Evil Snowman",  icon: { row: 16, col: 2 } }
       ]
     },
     {
-      name: "Giant Spider",
-      level: 7,
-      icon: "monstruoname.png",
-      drops: [
-        { name: "Spider Silk", icon: "itemdefault.png" },
-        { name: "Venom Fang", icon: "itemdefault.png" },
-        { name: "Compound Eye", icon: "itemdefault.png" }
+      title: "Halloween Bosses",
+      bosses: [
+        { name: "Wicked Pumpkin", icon: { row: 17, col: 1 } },
+        { name: "La Calaca",      icon: { row: 17, col: 0 } },
+        { name: "Haunted Willow", icon: { row: 11, col: 2, cell: 48 } }
       ]
     },
     {
-      name: "Young Dragon",
-      level: 15,
-      icon: "monstruoname.png",
-      drops: [
-        { name: "Dragon Scale", icon: "itemdefault.png" },
-        { name: "Sharp Claw", icon: "itemdefault.png" },
-        { name: "Bottled Breath", icon: "itemdefault.png" }
+      title: "Easter Bosses",
+      bosses: [
+        { name: "Bonnie Rabbit",      icon: { row: 18, col: 0 } },
+        { name: "Clyde Rabbit",       icon: { row: 18, col: 1 } },
+        { name: "Blue Easter Egg",    icon: { row: 19, col: 0 } },
+        { name: "Green Easter Egg",   icon: { row: 19, col: 1 } },
+        { name: "Purple Easter Egg",  icon: { row: 19, col: 2 } }
+      ]
+    },
+    {
+      title: "Legendary Bosses",
+      bosses: [
+        { name: "Drakon The Devourer", icon: { row: 0, col: 4, cell: 48 } },
+        { name: "Rat King",            icon: { row: 1, col: 4, cell: 48 } },
+        { name: "Korvak Deathfrost",   icon: { row: 2, col: 4, cell: 48 } }
       ]
     }
   ];
 
-  const grid = document.getElementById("monster-grid");
-  const btnMonsters = document.getElementById("btn-monsters");
-  const category = document.getElementById("monster-category");
-  const overlay = document.getElementById("overlay");
-  const btnClose = document.getElementById("btn-close");
-  const hint = document.getElementById("hint");
+  // Loaded once, lazily, the first time a sprite icon is needed.
+  let sheetSize = null; // {w, h} natural pixel size of monsterlist.png
+  let sheetLoading = null;
+  function loadSheet(){
+    if(sheetLoading) return sheetLoading;
+    sheetLoading = new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => { sheetSize = { w: img.naturalWidth, h: img.naturalHeight }; resolve(sheetSize); };
+      img.onerror = () => resolve(null);
+      img.src = SPRITE_SHEET;
+    });
+    return sheetLoading;
+  }
 
-  function renderGrid(){
-    grid.innerHTML = "";
-    monsters.forEach((m, i) => {
-      const card = document.createElement("button");
-      card.className = "monster-card";
-      card.innerHTML = `
-        <span class="icon-box"><img src="${m.icon}" alt=""></span>
-        <span class="m-name">${m.name}</span>
-        <span class="m-level">Level ${m.level}</span>
-      `;
-      card.addEventListener("click", () => openModal(i));
-      grid.appendChild(card);
+  // Builds an .icon-box containing the cropped {row, col} cell from the
+  // sheet, scaled to whatever size the box ends up being rendered at.
+  function spriteBox(icon, extraClass){
+    const cell = icon.cell || DEFAULT_CELL;
+    const box = document.createElement("span");
+    box.className = "icon-box" + (extraClass ? " " + extraClass : "");
+    const img = document.createElement("img");
+    img.className = "sprite-icon";
+    img.alt = "";
+    img.dataset.row = icon.row;
+    img.dataset.col = icon.col;
+    img.dataset.cell = cell;
+    img.src = SPRITE_SHEET;
+    box.appendChild(img);
+    placeSprite(img);
+    loadSheet().then(() => placeSprite(img));
+    return box;
+  }
+
+  // Positions/sizes one sprite <img> inside its box. Safe to call
+  // repeatedly (on load, on panel-open, on resize) — it's a no-op
+  // if the box has no real size yet (e.g. still display:none).
+  function placeSprite(img){
+    const box = img.parentElement;
+    if(!box) return;
+    const size = box.clientWidth || box.clientHeight;
+    if(!size) return;
+    const cell = Number(img.dataset.cell) || DEFAULT_CELL;
+    const scale = size / cell;
+    const row = Number(img.dataset.row), col = Number(img.dataset.col);
+    img.style.left = (-col * cell * scale) + "px";
+    img.style.top = (-row * cell * scale) + "px";
+    if(sheetSize){
+      img.style.width = (sheetSize.w * scale) + "px";
+      img.style.height = (sheetSize.h * scale) + "px";
+    } else {
+      img.style.width = size + "px";
+      img.style.height = size + "px";
+    }
+  }
+
+  // Re-places every sprite inside `root` — call right after a hidden
+  // panel (closed section, closed modal) becomes visible.
+  function placeSpritesIn(root){
+    root.querySelectorAll(".sprite-icon").forEach(placeSprite);
+  }
+
+  let spriteResizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(spriteResizeTimer);
+    spriteResizeTimer = setTimeout(() => placeSpritesIn(document.body), 150);
+  });
+
+  /* =========================================================
+     Rendering
+     ========================================================= */
+  function makeCard(entity){
+    const card = document.createElement("button");
+    card.className = "entity-card";
+    card.appendChild(spriteBox(entity.icon));
+
+    const nameEl = document.createElement("span");
+    nameEl.className = "e-name";
+    nameEl.textContent = entity.name;
+    card.appendChild(nameEl);
+
+    if(entity.level !== undefined){
+      const levelEl = document.createElement("span");
+      levelEl.className = "e-level";
+      levelEl.textContent = "Level " + entity.level;
+      card.appendChild(levelEl);
+    }
+
+    card.addEventListener("click", () => openModal(entity));
+    return card;
+  }
+
+  function renderMonsters(){
+    const gridEl = document.getElementById("monsters-grid");
+    gridEl.innerHTML = "";
+    monsters.forEach(m => gridEl.appendChild(makeCard(m)));
+  }
+
+  function renderBosses(){
+    const wrap = document.getElementById("bosses-groups");
+    wrap.innerHTML = "";
+    bossGroups.forEach(group => {
+      const h3 = document.createElement("h3");
+      h3.className = "group-title";
+      h3.textContent = group.title;
+      wrap.appendChild(h3);
+
+      const gridEl = document.createElement("div");
+      gridEl.className = "entity-grid";
+      group.bosses.forEach(b => gridEl.appendChild(makeCard(b)));
+      wrap.appendChild(gridEl);
     });
   }
 
-  function openModal(i){
-    const m = monsters[i];
-    document.getElementById("modal-img").src = m.icon;
-    document.getElementById("modal-name").textContent = m.name;
-    document.getElementById("modal-level").textContent = "Level " + m.level;
+  function openModal(entity){
+    const iconSlot = document.getElementById("modal-icon");
+    iconSlot.innerHTML = "";
+    iconSlot.appendChild(spriteBox(entity.icon).firstChild);
 
+    document.getElementById("modal-name").textContent = entity.name;
+
+    const levelEl = document.getElementById("modal-level");
+    if(entity.level !== undefined){
+      levelEl.textContent = "Level " + entity.level;
+      levelEl.style.display = "";
+    } else {
+      levelEl.style.display = "none";
+    }
+
+    const dropsWrap = document.getElementById("modal-drops-wrap");
     const dropsBox = document.getElementById("modal-drops");
     dropsBox.innerHTML = "";
-    m.drops.forEach(d => {
-      const row = document.createElement("div");
-      row.className = "drop-item";
-      row.innerHTML = `
-        <span class="icon-box"><img src="${d.icon}" alt=""></span>
-        <span>${d.name}</span>
-      `;
-      dropsBox.appendChild(row);
-    });
+    const drops = entity.drops || [];
+    if(drops.length){
+      dropsWrap.classList.add("has-items");
+      drops.forEach(d => {
+        const row = document.createElement("div");
+        row.className = "drop-item";
+        row.innerHTML = `
+          <span class="icon-box"><img src="${d.icon}" alt=""></span>
+          <span>${d.name}</span>
+        `;
+        dropsBox.appendChild(row);
+      });
+    } else {
+      dropsWrap.classList.remove("has-items");
+    }
 
+    // the modal was still display:none while the icon above was measured,
+    // so its box had no real width yet — redraw now that it's shown
     overlay.classList.add("open");
+    placeSpritesIn(overlay);
   }
 
   function closeModal(){
     overlay.classList.remove("open");
   }
 
-  btnMonsters.addEventListener("click", () => {
-    const isOpen = category.classList.toggle("open");
-    btnMonsters.setAttribute("aria-expanded", isOpen);
-    // hide the "pick an option" hint once something is actually open
-    hint.style.display = isOpen ? "none" : "flex";
+  /* =========================================================
+     Top-level panels (Monsters / Bosses) + "pick an option" hint
+     ========================================================= */
+  const overlay = document.getElementById("overlay");
+  const btnClose = document.getElementById("btn-close");
+  const hint = document.getElementById("hint");
+  const toolbarBtns = Array.from(document.querySelectorAll(".toolbar-btn"));
+
+  function anyPanelOpen(){
+    return document.querySelector(".panel.open") !== null;
+  }
+
+  toolbarBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const panel = document.getElementById(btn.dataset.panel);
+      const opening = !panel.classList.contains("open");
+
+      // only one panel open at a time
+      document.querySelectorAll(".panel.open").forEach(p => p.classList.remove("open"));
+      toolbarBtns.forEach(b => { b.classList.remove("active"); b.setAttribute("aria-expanded", "false"); });
+
+      if(opening){
+        panel.classList.add("open");
+        btn.classList.add("active");
+        btn.setAttribute("aria-expanded", "true");
+        placeSpritesIn(panel);
+      }
+
+      hint.style.display = anyPanelOpen() ? "none" : "flex";
+    });
   });
 
   btnClose.addEventListener("click", closeModal);
   overlay.addEventListener("click", (e) => { if (e.target === overlay) closeModal(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
 
-  renderGrid();
+  renderMonsters();
+  renderBosses();
 
   /* =========================================================
      Hint carousel: cycles through the top-bar options one at a
      time, on a loop, so people know what's clickable up there.
-     Add more entries here whenever a new button is added to the
-     header — the carousel picks them up automatically.
+     Mirrors the toolbar buttons — add a new button above and a
+     matching line here.
      ========================================================= */
   const hintOptions = [
-    { icon: "monsterbutton.png", label: "Monsters" }
-    // { icon: "nextbutton.png", label: "Next option" },  <- add future buttons like this
+    { icon: "monsterbutton.png", label: "Monsters" },
+    { icon: "bossicon.png",      label: "Bosses" }
   ];
 
   const carousel = document.getElementById("hint-carousel");
