@@ -327,52 +327,52 @@
 
   // --- Monsters (32x32 grid) ---
   const monsters = [
-    { name: "Crab",                 level: 1,   icon: { row: 0,  col: 0 } },
-    { name: "Rat",                  level: 1,   icon: { row: 1,  col: 0 } },
-    { name: "Rat",                  level: 3,   icon: { row: 2,  col: 0 } },
-    { name: "Crow",                 level: 6,   icon: { row: 3,  col: 0 } },
-    { name: "Wolf",                 level: 9,   icon: { row: 4,  col: 0 } },
-    { name: "Scorpion",             level: 12,  icon: { row: 5,  col: 0 } },
-    { name: "Cobra",                level: 13,  icon: { row: 6,  col: 0 } },
-    { name: "Worm",                 level: 14,  icon: { row: 7,  col: 0 } },
-    { name: "Goblin",               level: 15,  icon: { row: 8,  col: 0 } },
-    { name: "Mummy",                level: 25,  icon: { row: 9,  col: 0 } },
-    { name: "Pharaon",              level: 35,  icon: { row: 10, col: 0 } },
-    { name: "Assassin",             level: 40,  icon: { row: 0,  col: 2 } },
-    { name: "Assassin",             level: 45,  icon: { row: 0,  col: 1 } },
-    { name: "Assassin Ninja",       level: 50,  icon: { row: 0,  col: 3 } },
-    { name: "Zombie",               level: 65,  icon: { row: 1,  col: 1 } },
-    { name: "Headless Zombie",      level: 65,  icon: { row: 1,  col: 2 } },
-    { name: "Skeleton",             level: 75,  icon: { row: 2,  col: 1 } },
-    { name: "Skeleton Archer",      level: 80,  icon: { row: 2,  col: 2 } },
-    { name: "Skeleton Warrior",     level: 90,  icon: { row: 2,  col: 3 } },
-    { name: "Vampire",              level: 100, icon: { row: 3,  col: 1 } },
-    { name: "Vampire",              level: 110, icon: { row: 3,  col: 2 } },
-    { name: "Drow Assassin",        level: 120, icon: { row: 4,  col: 1 } },
-    { name: "Drow Ranger",          level: 125, icon: { row: 4,  col: 2 } },
-    { name: "Drow Mage",            level: 130, icon: { row: 5,  col: 2 } },
-    { name: "Drow Fighter",         level: 135, icon: { row: 5,  col: 1 } },
-    { name: "Drow Sorceress",       level: 140, icon: { row: 5,  col: 3 } },
-    { name: "Lizard Warrior",       level: 150, icon: { row: 6,  col: 2 } },
-    { name: "Lizard Archer",        level: 160, icon: { row: 6,  col: 1 } },
-    { name: "Lizard Shaman",        level: 170, icon: { row: 7,  col: 1 } },
-    { name: "Lizard Captain",       level: 180, icon: { row: 8,  col: 2 } },
-    { name: "Lizard High Shaman",   level: 190, icon: { row: 8,  col: 3 } },
-    { name: "Djinn",                level: 150, icon: { row: 9,  col: 2 } },
-    { name: "Dead Eye",             level: 170, icon: { row: 9,  col: 1 } },
-    { name: "Gargoyle",             level: 190, icon: { row: 10, col: 2 } },
-    { name: "Minotaur",             level: 225, icon: { row: 11, col: 0 } },
-    { name: "Minotaur",             level: 250, icon: { row: 11, col: 1 } },
-    { name: "Minotaur",             level: 275, icon: { row: 11, col: 2 } },
-    { name: "Dragon Hatchling",     level: 225, icon: { row: 12, col: 0 } },
-    { name: "Dragon",               level: 250, icon: { row: 12, col: 1 } },
-    { name: "Dragon Warden",        level: 280, icon: { row: 12, col: 2 } },
-    { name: "Ice Elemental",        level: 300, icon: { row: 13, col: 1 } },
-    { name: "Ice Dragon",           level: 325, icon: { row: 13, col: 0 } },
-    { name: "Yeti",                 level: 350, icon: { row: 13, col: 2 } },
-    { name: "Lava Golem",           level: 375, icon: { row: 14, col: 1 } },
-    { name: "Orthrus",              level: 400, icon: { row: 14, col: 2 } },
-    { name: "Demon",                level: 450, icon: { row: 14, col: 0 } }
+    { name: "Crab",                 level: 1,   icon: { col: 0,  row: 0 } },
+    { name: "Rat",                  level: 1,   icon: { col: 1,  row: 0 } },
+    { name: "Rat",                  level: 3,   icon: { col: 2,  row: 0 } },
+    { name: "Crow",                 level: 6,   icon: { col: 3,  row: 0 } },
+    { name: "Wolf",                 level: 9,   icon: { col: 4,  row: 0 } },
+    { name: "Scorpion",             level: 12,  icon: { col: 5,  row: 0 } },
+    { name: "Cobra",                level: 13,  icon: { col: 6,  row: 0 } },
+    { name: "Worm",                 level: 14,  icon: { col: 7,  row: 0 } },
+    { name: "Goblin",               level: 15,  icon: { col: 8,  row: 0 } },
+    { name: "Mummy",                level: 25,  icon: { col: 9,  row: 0 } },
+    { name: "Pharaon",              level: 35,  icon: { col: 10, row: 0 } },
+    { name: "Assassin",             level: 40,  icon: { col: 0,  row: 2 } },
+    { name: "Assassin",             level: 45,  icon: { col: 0,  row: 1 } },
+    { name: "Assassin Ninja",       level: 50,  icon: { col: 0,  row: 3 } },
+    { name: "Zombie",               level: 65,  icon: { col: 1,  row: 1 } },
+    { name: "Headless Zombie",      level: 65,  icon: { col: 1,  row: 2 } },
+    { name: "Skeleton",             level: 75,  icon: { col: 2,  row: 1 } },
+    { name: "Skeleton Archer",      level: 80,  icon: { col: 2,  row: 2 } },
+    { name: "Skeleton Warrior",     level: 90,  icon: { col: 2,  row: 3 } },
+    { name: "Vampire",              level: 100, icon: { col: 3,  row: 1 } },
+    { name: "Vampire",              level: 110, icon: { col: 3,  row: 2 } },
+    { name: "Drow Assassin",        level: 120, icon: { col: 4,  row: 1 } },
+    { name: "Drow Ranger",          level: 125, icon: { col: 4,  row: 2 } },
+    { name: "Drow Mage",            level: 130, icon: { col: 5,  row: 2 } },
+    { name: "Drow Fighter",         level: 135, icon: { col: 5,  row: 1 } },
+    { name: "Drow Sorceress",       level: 140, icon: { col: 5,  row: 3 } },
+    { name: "Lizard Warrior",       level: 150, icon: { col: 6,  row: 2 } },
+    { name: "Lizard Archer",        level: 160, icon: { col: 6,  row: 1 } },
+    { name: "Lizard Shaman",        level: 170, icon: { col: 7,  row: 1 } },
+    { name: "Lizard Captain",       level: 180, icon: { col: 8,  row: 2 } },
+    { name: "Lizard High Shaman",   level: 190, icon: { col: 8,  row: 3 } },
+    { name: "Djinn",                level: 150, icon: { col: 9,  row: 2 } },
+    { name: "Dead Eye",             level: 170, icon: { col: 9,  row: 1 } },
+    { name: "Gargoyle",             level: 190, icon: { col: 10, row: 2 } },
+    { name: "Minotaur",             level: 225, icon: { col: 11, row: 0 } },
+    { name: "Minotaur",             level: 250, icon: { col: 11, row: 1 } },
+    { name: "Minotaur",             level: 275, icon: { col: 11, row: 2 } },
+    { name: "Dragon Hatchling",     level: 225, icon: { col: 12, row: 0 } },
+    { name: "Dragon",               level: 250, icon: { col: 12, row: 1 } },
+    { name: "Dragon Warden",        level: 280, icon: { col: 12, row: 2 } },
+    { name: "Ice Elemental",        level: 300, icon: { col: 13, row: 1 } },
+    { name: "Ice Dragon",           level: 325, icon: { col: 13, row: 0 } },
+    { name: "Yeti",                 level: 350, icon: { col: 13, row: 2 } },
+    { name: "Lava Golem",           level: 375, icon: { col: 14, row: 1 } },
+    { name: "Orthrus",              level: 400, icon: { col: 14, row: 2 } },
+    { name: "Demon",                level: 450, icon: { col: 14, row: 0 } }
   ];
 
   // --- Bosses, grouped. Same 32x32 grid unless an entry sets its own `cell`. ---
@@ -380,53 +380,53 @@
     {
       title: "Normal Bosses",
       bosses: [
-        { name: "Vampire King",     icon: { row: 3,  col: 3 } },
-        { name: "Drow Queen",       icon: { row: 5,  col: 4 } },
-        { name: "General Krinok",   icon: { row: 9,  col: 4 } },
-        { name: "Gargoyle",         icon: { row: 10, col: 3 } },
-        { name: "Zarron Bravehorn", icon: { row: 11, col: 3 } },
-        { name: "Cerberus",         icon: { row: 14, col: 3 } }
+        { name: "Vampire King",     icon: { col: 3,  row: 3 } },
+        { name: "Drow Queen",       icon: { col: 5,  row: 4 } },
+        { name: "General Krinok",   icon: { col: 9,  row: 4 } },
+        { name: "Gargoyle",         icon: { col: 10, row: 3 } },
+        { name: "Zarron Bravehorn", icon: { col: 11, row: 3 } },
+        { name: "Cerberus",         icon: { col: 14, row: 3 } }
       ]
     },
     {
       title: "Uncommon Bosses",
       bosses: [
-        { name: "Slime Lord",       icon: { row: 16, col: 0 } },
-        { name: "Goblin Lord",      icon: { row: 8,  col: 1 } },
-        { name: "Kamon The Cursed", icon: { row: 10, col: 1 } }
+        { name: "Slime Lord",       icon: { col: 16, row: 0 } },
+        { name: "Goblin Lord",      icon: { col: 8,  row: 1 } },
+        { name: "Kamon The Cursed", icon: { col: 10, row: 1 } }
       ]
     },
     {
       title: "Christmas Bosses",
       bosses: [
-        { name: "Evil Santa",    icon: { row: 16, col: 1 } },
-        { name: "Evil Snowman",  icon: { row: 16, col: 2 } }
+        { name: "Evil Santa",    icon: { col: 16, row: 1 } },
+        { name: "Evil Snowman",  icon: { col: 16, row: 2 } }
       ]
     },
     {
       title: "Halloween Bosses",
       bosses: [
-        { name: "Wicked Pumpkin", icon: { row: 17, col: 1 } },
-        { name: "La Calaca",      icon: { row: 17, col: 0 } },
-        { name: "Haunted Willow", icon: { row: 11, col: 2, cell: 48 } }
+        { name: "Wicked Pumpkin", icon: { col: 17, row: 1 } },
+        { name: "La Calaca",      icon: { col: 17, row: 0 } },
+        { name: "Haunted Willow", icon: { col: 11, row: 2, cell: 48 } }
       ]
     },
     {
       title: "Easter Bosses",
       bosses: [
-        { name: "Bonnie Rabbit",      icon: { row: 18, col: 0 } },
-        { name: "Clyde Rabbit",       icon: { row: 18, col: 1 } },
-        { name: "Blue Easter Egg",    icon: { row: 19, col: 0 } },
-        { name: "Green Easter Egg",   icon: { row: 19, col: 1 } },
-        { name: "Purple Easter Egg",  icon: { row: 19, col: 2 } }
+        { name: "Bonnie Rabbit",      icon: { col: 18, row: 0 } },
+        { name: "Clyde Rabbit",       icon: { col: 18, row: 1 } },
+        { name: "Blue Easter Egg",    icon: { col: 19, row: 0 } },
+        { name: "Green Easter Egg",   icon: { col: 19, row: 1 } },
+        { name: "Purple Easter Egg",  icon: { col: 19, row: 2 } }
       ]
     },
     {
       title: "Legendary Bosses",
       bosses: [
-        { name: "Drakon The Devourer", icon: { row: 0, col: 4, cell: 48 } },
-        { name: "Rat King",            icon: { row: 1, col: 4, cell: 48 } },
-        { name: "Korvak Deathfrost",   icon: { row: 2, col: 4, cell: 48 } }
+        { name: "Drakon The Devourer", icon: { col: 0, row: 4, cell: 48 } },
+        { name: "Rat King",            icon: { col: 1, row: 4, cell: 48 } },
+        { name: "Korvak Deathfrost",   icon: { col: 2, row: 4, cell: 48 } }
       ]
     }
   ];
