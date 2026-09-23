@@ -202,7 +202,8 @@
   }
   .server-card:hover, .server-card:focus-visible{border-color:var(--accent);outline:none}
   .server-card .icon-box{width:72px;height:72px}
-  .server-card .s-num{font-size:.6rem}
+  .server-card .icon-box img.real-icon{image-rendering:auto;border-radius:8px}
+  .server-card .s-num{font-size:.6rem;line-height:1.5;word-break:break-word}
   .server-card .s-code{
     font-size:.45rem;
     color:var(--muted);
@@ -498,6 +499,52 @@
     "qxnPmsRQMF","xxXPPdfUKw","5kR82Eu97Y"
   ];
 
+  // Known server names, keyed by invite code. Codes missing here show
+  // "Server N" until the automatic lookup below finds their real name.
+  const discordNames = {
+    "gkuNQtcHh5": "Tomato Market",
+    "qf6ZnttTPx": "Rucoy Online Market Place",
+    "QGZZY6N5vh": "Europe Market",
+    "YexHdYJFD6": "DIAMOND MARKET",
+    "bbDSKj98bR": "DRAGON MARKET",
+    "Dv5BWnq837": "MERCADO BRASILEIRO",
+    "WYb4vNBJV7": "ByCorvus TRADE",
+    "4fvhD93dHv": "Rucoy Market",
+    "364muFHVtb": "Asian Market",
+    "QBAKUQS9nm": "Rucoy Aze",
+    "BBthTZh8rZ": "Rucoy Center",
+    "rdhBx3EsKX": "WEYGAR TRADE Rucoy Online",
+    "ZnANWvXtYk": "Loja do Bestial",
+    "FNHHXy7MGc": "DEMON MARKET",
+    "eBQSXteytc": "Rucoy Market",
+    "7JC5Nesqgk": "Latam Market",
+    "W629GfUQbN": "[ROW] Rucoy Online World",
+    "75x4ZmR5H6": "Klauzo's Treasury",
+    "3HfdU4THx9": "LOLIGERBOSS SHOP",
+    "nSfn5KzZcq": "ABYSS MARKET",
+    "n2v7A4vMX7": "Junak Market",
+    "49F5fctc7B": "Rucoy World",
+    "pPARhgVe3g": "Dream Market Place",
+    "e2ZQwSNEXD": "Rucoy Farm",
+    "Fe4YKRHTgC": "Lost Market (Rucoy)",
+    "Fg42XDPpbS": "Eu3 chill Shop",
+    "kNJ2BM4MnV": "Frozen Market Rucoy - FMR",
+    "JwcAjpxXcq": "Rucoy Trade",
+    "uXk2ySjv2q": "RUCOY TRADE-1",
+    "KK5sp4WVEc": "Hippro - Trade Market",
+    "UCtG6kUak4": "Rucoy Safe Trade",
+    "Jwr3gAqw7x": "The sell server",
+    "dSqRrc4P98": "ANGMAR Rucoy",
+    "yCUQGNsxee": "LuenSshop",
+    "bRKr5E85pt": "The Rucoy Nexus",
+    "K65BhmZwbD": "Rucoy Server",
+    "9kRGYtaXYs": "Fire Market Rucoy Online",
+    "MjRPprKmCq": "Agent Trade",
+    "AGssspWCjw": "WASABIĞ TRADE",
+    "qxnPmsRQMF": "Kayn Trade",
+    "xxXPPdfUKw": "Eren Trade"
+  };
+
   // Loaded once, lazily, the first time a sprite icon is needed.
   let sheetSize = null; // {w, h} natural pixel size of monsterlist.png
   let sheetLoading = null;
@@ -620,15 +667,74 @@
       a.href = "https://discord.gg/" + code;
       a.target = "_blank";
       a.rel = "noopener noreferrer";
+      a.dataset.code = code;
       a.innerHTML = `
         <span class="icon-box"><img src="discordservericon.png" alt=""></span>
-        <span class="s-num">Server ${i + 1}</span>
+        <span class="s-num"></span>
         <span class="s-code">discord.gg/${code}</span>
         <span class="s-join">Join</span>
       `;
+      a.querySelector(".s-num").textContent = discordNames[code] || ("Server " + (i + 1));
       gridEl.appendChild(a);
     });
     document.getElementById("discord-count").textContent = discordCodes.length + " servers";
+  }
+
+  // Looks up each server's real name and icon from its invite code using
+  // Discord's public invite endpoint. Results are cached in localStorage
+  // for 7 days. If a lookup fails (expired invite, offline, rate limit) the
+  // card keeps its static name and the default discordservericon.png.
+  const INFO_CACHE_KEY = "discordInfo_v2";
+  const INFO_TTL = 7 * 24 * 60 * 60 * 1000;
+
+  function readInfoCache(){
+    try { return JSON.parse(localStorage.getItem(INFO_CACHE_KEY)) || {}; } catch(e){ return {}; }
+  }
+  function writeInfoCache(cache){
+    try { localStorage.setItem(INFO_CACHE_KEY, JSON.stringify(cache)); } catch(e){}
+  }
+
+  function applyServerInfo(card, info){
+    if(info.name) card.querySelector(".s-num").textContent = info.name;
+    if(info.icon){
+      const img = card.querySelector(".icon-box img");
+      img.onerror = () => {
+        img.onerror = null;
+        img.classList.remove("real-icon");
+        img.src = "discordservericon.png";
+      };
+      img.classList.add("real-icon");
+      img.src = info.icon;
+    }
+  }
+
+  async function loadServerInfo(){
+    const cache = readInfoCache();
+    const cards = Array.from(document.querySelectorAll("#discord-grid .server-card"));
+    for(const card of cards){
+      const code = card.dataset.code;
+      const hit = cache[code];
+      if(hit && Date.now() - hit.t < INFO_TTL){ applyServerInfo(card, hit); continue; }
+      try{
+        const res = await fetch("https://discord.com/api/v9/invites/" + encodeURIComponent(code));
+        if(res.status === 429) break; // rate limited: try again next visit
+        if(res.ok){
+          const data = await res.json();
+          const g = data && data.guild;
+          if(g && g.name){
+            const info = {
+              name: g.name,
+              icon: g.icon ? "https://cdn.discordapp.com/icons/" + g.id + "/" + g.icon + ".png?size=128" : null,
+              t: Date.now()
+            };
+            applyServerInfo(card, info);
+            cache[code] = info;
+            writeInfoCache(cache);
+          }
+        }
+      }catch(e){}
+      await new Promise(r => setTimeout(r, 200));
+    }
   }
 
   function openModal(entity){
@@ -714,6 +820,7 @@
   renderMonsters();
   renderBosses();
   renderDiscord();
+  loadServerInfo();
 
   /* =========================================================
      Hint carousel: cycles through the top-bar options one at a
