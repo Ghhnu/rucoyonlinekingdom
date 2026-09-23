@@ -17,12 +17,15 @@
     --ink:#f0eee9;
     --muted:#a8a49c;
     --accent:#c9a24b;
+    --danger:#c94b4b;
+    --ok:#4bc97a;
     box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px);
     padding-bottom:env(safe-area-inset-bottom,0px);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   button{font:inherit;color:inherit;background:none;border:0}
+  input{font:inherit;color:inherit}
   html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
   body{
     height:100%;
@@ -148,7 +151,7 @@
   .panel{display:none}
   .panel.open{display:block}
 
-  .cat-header{margin-bottom:1rem}
+  .cat-header{margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
   .cat-header h2{font-size:.75rem;font-weight:400;color:var(--muted)}
 
   .group-title{
@@ -252,6 +255,111 @@
     .entity-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
     .entity-card .icon-box{width:60px;height:60px}
   }
+
+  /* --- tracker panel --- */
+  .total-tracked{
+    font-size:.55rem;
+    color:var(--muted);
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.5rem .7rem;
+    white-space:nowrap;
+  }
+  .total-tracked b{color:var(--accent);font-weight:400}
+
+  .tracker-search{
+    display:flex;
+    gap:.6rem;
+    margin-bottom:1.5rem;
+  }
+  .tracker-search input{
+    flex:1;
+    min-width:0;
+    background:var(--panel);
+    border:1px solid var(--line);
+    color:var(--ink);
+    border-radius:10px;
+    padding:.8rem .9rem;
+    font-size:.65rem;
+  }
+  .tracker-search input:focus{outline:none;border-color:var(--accent)}
+  .tracker-search button{
+    background:var(--accent);
+    color:#20180a;
+    border-radius:10px;
+    padding:.8rem 1.1rem;
+    font-size:.6rem;
+    cursor:pointer;
+    flex:none;
+  }
+  .tracker-search button:disabled{opacity:.5;cursor:default}
+
+  .tracker-status{
+    font-size:.6rem;
+    color:var(--muted);
+    margin-bottom:1rem;
+    display:none;
+  }
+  .tracker-status.show{display:block}
+  .tracker-status.error{color:var(--danger)}
+
+  .tracker-card{
+    display:none;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:1.25rem;
+    margin-bottom:2rem;
+  }
+  .tracker-card.show{display:block}
+
+  .tracker-card-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:1rem;
+    flex-wrap:wrap;
+    margin-bottom:1.25rem;
+  }
+  .tracker-card h3{font-size:.8rem;line-height:1.6}
+  .tracker-badges{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+  .badge{
+    font-size:.52rem;
+    padding:.35rem .55rem;
+    border-radius:6px;
+    border:1px solid var(--line);
+  }
+  .badge.supporter{color:var(--accent);border-color:var(--accent)}
+  .badge.gm{color:#7fb5e0;border-color:#7fb5e0}
+  .badge.banned{color:var(--danger);border-color:var(--danger)}
+
+  .tracker-fields{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:1rem;
+  }
+  .tracker-field{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.7rem .8rem;
+  }
+  .tracker-field .f-label{font-size:.5rem;color:var(--muted);margin-bottom:.5rem}
+  .tracker-field .f-value{font-size:.62rem;line-height:1.6}
+
+  .tracker-alts{margin-top:1.25rem}
+  .tracker-alts h4{font-size:.58rem;color:var(--muted);margin-bottom:.7rem;font-weight:400}
+  .alt-list{display:flex;flex-wrap:wrap;gap:.5rem}
+  .alt-chip{
+    font-size:.58rem;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.45rem .7rem;
+    cursor:pointer;
+  }
+  .alt-chip:hover{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -271,6 +379,10 @@
       <span class="icon-box"><img src="bossicon.png" alt=""></span>
       Bosses
     </button>
+    <button class="toolbar-btn" data-panel="tracker-panel" aria-expanded="false">
+      <span class="icon-box"><img src="tracker.png" alt=""></span>
+      Tracker
+    </button>
   </div>
 </div>
 
@@ -288,6 +400,34 @@
   <section id="bosses-panel" class="panel" aria-label="Bosses">
     <div class="cat-header"><h2>Bosses</h2></div>
     <div id="bosses-groups"></div>
+  </section>
+
+  <section id="tracker-panel" class="panel" aria-label="Tracker">
+    <div class="cat-header">
+      <h2>Tracker</h2>
+      <span class="total-tracked">Total Tracked <b id="tracker-total">0</b> characters</span>
+    </div>
+
+    <div class="tracker-search">
+      <input type="text" id="tracker-input" placeholder="Character name..." autocomplete="off">
+      <button id="tracker-search-btn">Search</button>
+    </div>
+
+    <div class="tracker-status" id="tracker-status"></div>
+
+    <div class="tracker-card" id="tracker-card">
+      <div class="tracker-card-top">
+        <div>
+          <h3 id="tk-name"></h3>
+          <div class="tracker-badges" id="tk-badges"></div>
+        </div>
+      </div>
+      <div class="tracker-fields" id="tk-fields"></div>
+      <div class="tracker-alts" id="tk-alts-wrap" style="display:none">
+        <h4>Another Accounts</h4>
+        <div class="alt-list" id="tk-alts"></div>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -614,6 +754,7 @@
         btn.classList.add("active");
         btn.setAttribute("aria-expanded", "true");
         placeSpritesIn(panel);
+        if(typeof onPanelOpen === "function") onPanelOpen(panel.id);
       }
 
       hint.style.display = anyPanelOpen() ? "none" : "flex";
@@ -635,7 +776,8 @@
      ========================================================= */
   const hintOptions = [
     { icon: "monsterbutton.png", label: "Monsters" },
-    { icon: "bossicon.png",      label: "Bosses" }
+    { icon: "bossicon.png",      label: "Bosses" },
+    { icon: "tracker.png",       label: "Tracker" }
   ];
 
   const carousel = document.getElementById("hint-carousel");
@@ -664,6 +806,140 @@
     }, GAP_MS);
   }
   cycleHint();
+
+  /* =========================================================
+     Tracker
+     ---------------------------------------------------------
+     rucoyonline.com does not allow cross-origin requests from
+     the browser, and a static json file can't be written to
+     from client-side JS — so a small backend does the actual
+     fetching + persistence. Point this at your deployed worker
+     (see worker.js). Everything below just talks to that API.
+     ========================================================= */
+  const TRACKER_API = "https://YOUR-WORKER-SUBDOMAIN.workers.dev"; // <-- set this after deploying worker.js
+
+  const tkInput      = document.getElementById("tracker-input");
+  const tkSearchBtn  = document.getElementById("tracker-search-btn");
+  const tkStatus     = document.getElementById("tracker-status");
+  const tkCard       = document.getElementById("tracker-card");
+  const tkName       = document.getElementById("tk-name");
+  const tkBadges     = document.getElementById("tk-badges");
+  const tkFields     = document.getElementById("tk-fields");
+  const tkAltsWrap   = document.getElementById("tk-alts-wrap");
+  const tkAlts       = document.getElementById("tk-alts");
+  const tkTotal      = document.getElementById("tracker-total");
+
+  function setStatus(msg, isError){
+    tkStatus.textContent = msg || "";
+    tkStatus.classList.toggle("show", !!msg);
+    tkStatus.classList.toggle("error", !!isError);
+  }
+
+  function field(label, value){
+    const box = document.createElement("div");
+    box.className = "tracker-field";
+    box.innerHTML = `<div class="f-label">${label}</div><div class="f-value"></div>`;
+    box.querySelector(".f-value").textContent = value;
+    return box;
+  }
+
+  function renderCharacter(data){
+    tkName.textContent = data.name;
+
+    tkBadges.innerHTML = "";
+    if(data.supporter){
+      const b = document.createElement("span");
+      b.className = "badge supporter";
+      b.textContent = "Supporter";
+      tkBadges.appendChild(b);
+    }
+    if(data.gameMaster){
+      const b = document.createElement("span");
+      b.className = "badge gm";
+      b.textContent = "Game Master";
+      tkBadges.appendChild(b);
+    }
+    if(data.banned){
+      const b = document.createElement("span");
+      b.className = "badge banned";
+      b.textContent = "Banned";
+      tkBadges.appendChild(b);
+    }
+
+    tkFields.innerHTML = "";
+    if(data.level)      tkFields.appendChild(field("Level", data.level));
+    if(data.title)      tkFields.appendChild(field("Title", data.title));
+    if(data.guild)       tkFields.appendChild(field("Guild", data.guild));
+    if(data.born)        tkFields.appendChild(field("Born", data.born));
+    if(data.lastOnline)  tkFields.appendChild(field("Last online", data.lastOnline));
+
+    const alts = data.anotherAccounts || [];
+    tkAlts.innerHTML = "";
+    if(alts.length){
+      tkAltsWrap.style.display = "";
+      alts.forEach(altName => {
+        const chip = document.createElement("span");
+        chip.className = "alt-chip";
+        chip.textContent = altName;
+        chip.addEventListener("click", () => { tkInput.value = altName; searchTracker(); });
+        tkAlts.appendChild(chip);
+      });
+    } else {
+      tkAltsWrap.style.display = "none";
+    }
+
+    tkCard.classList.add("show");
+  }
+
+  async function fetchTotal(){
+    if(!TRACKER_API || TRACKER_API.includes("YOUR-WORKER")) return;
+    try{
+      const res = await fetch(`${TRACKER_API}/total`);
+      if(!res.ok) return;
+      const data = await res.json();
+      tkTotal.textContent = data.total ?? 0;
+    }catch(e){ /* silent — total is a nice-to-have */ }
+  }
+
+  async function searchTracker(){
+    const name = tkInput.value.trim();
+    if(!name) return;
+
+    if(!TRACKER_API || TRACKER_API.includes("YOUR-WORKER")){
+      setStatus("Tracker backend not configured yet (set TRACKER_API in the script).", true);
+      return;
+    }
+
+    tkSearchBtn.disabled = true;
+    tkCard.classList.remove("show");
+    setStatus("Searching...");
+
+    try{
+      const res = await fetch(`${TRACKER_API}/track?name=${encodeURIComponent(name)}`);
+      const data = await res.json();
+
+      if(!res.ok || data.error){
+        setStatus(data.error || "Character not found.", true);
+        return;
+      }
+
+      setStatus("");
+      renderCharacter(data);
+      fetchTotal();
+    }catch(e){
+      setStatus("Could not reach the tracker backend.", true);
+    }finally{
+      tkSearchBtn.disabled = false;
+    }
+  }
+
+  tkSearchBtn.addEventListener("click", searchTracker);
+  tkInput.addEventListener("keydown", (e) => { if(e.key === "Enter") searchTracker(); });
+
+  // called from the toolbar click handler when a panel is opened
+  function onPanelOpen(panelId){
+    if(panelId === "tracker-panel") fetchTotal();
+  }
 </script>
 
 </body>
