@@ -150,6 +150,7 @@
 
   .cat-header{margin-bottom:1rem}
   .cat-header h2{font-size:.75rem;font-weight:400;color:var(--muted)}
+  .cat-header .cat-sub{font-size:.55rem;color:var(--muted);margin-top:.6rem;line-height:1.8}
 
   .group-title{
     font-size:.6rem;
@@ -179,6 +180,46 @@
   .entity-card .icon-box{width:72px;height:72px}
   .entity-card .e-name{font-size:.6rem}
   .entity-card .e-level{font-size:.55rem;color:var(--muted)}
+
+  /* --- discord server cards: same look as entity cards, but they're links --- */
+  .server-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:1rem;
+  }
+  .server-card{
+    color:var(--ink);
+    text-decoration:none;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:.85rem;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:.55rem;
+    text-align:center;
+  }
+  .server-card:hover, .server-card:focus-visible{border-color:var(--accent);outline:none}
+  .server-card .icon-box{width:72px;height:72px}
+  .server-card .s-num{font-size:.6rem}
+  .server-card .s-code{
+    font-size:.45rem;
+    color:var(--muted);
+    word-break:break-all;
+    line-height:1.7;
+  }
+  .server-card .s-join{
+    align-self:stretch;
+    margin-top:.15rem;
+    font-size:.5rem;
+    color:var(--accent);
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:.45rem .3rem;
+  }
+  .server-card:hover .s-join, .server-card:focus-visible .s-join{border-color:var(--accent)}
 
   /* --- modal --- */
   .overlay{
@@ -251,6 +292,8 @@
   @media (max-width:480px){
     .entity-grid{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
     .entity-card .icon-box{width:60px;height:60px}
+    .server-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+    .server-card .icon-box{width:60px;height:60px}
   }
 </style>
 </head>
@@ -271,6 +314,10 @@
       <span class="icon-box"><img src="bossicon.png" alt=""></span>
       Bosses
     </button>
+    <button class="toolbar-btn" data-panel="discord-panel" aria-expanded="false">
+      <span class="icon-box"><img src="discord.png" alt=""></span>
+      Discord
+    </button>
   </div>
 </div>
 
@@ -288,6 +335,14 @@
   <section id="bosses-panel" class="panel" aria-label="Bosses">
     <div class="cat-header"><h2>Bosses</h2></div>
     <div id="bosses-groups"></div>
+  </section>
+
+  <section id="discord-panel" class="panel" aria-label="Discord Servers">
+    <div class="cat-header">
+      <h2>Discord Servers</h2>
+      <p class="cat-sub" id="discord-count"></p>
+    </div>
+    <div class="server-grid" id="discord-grid"></div>
   </section>
 </main>
 
@@ -431,6 +486,18 @@
     }
   ];
 
+  // --- Discord servers: only the invite codes (https://discord.gg/<code>) ---
+  const discordCodes = [
+    "gkuNQtcHh5","qf6ZnttTPx","QGZZY6N5vh","YexHdYJFD6","bbDSKj98bR","Dv5BWnq837",
+    "WYb4vNBJV7","4fvhD93dHv","364muFHVtb","QBAKUQS9nm","BBthTZh8rZ","rdhBx3EsKX",
+    "ZnANWvXtYk","FNHHXy7MGc","eBQSXteytc","7JC5Nesqgk","W629GfUQbN","75x4ZmR5H6",
+    "3HfdU4THx9","nSfn5KzZcq","n2v7A4vMX7","49F5fctc7B","pPARhgVe3g","JezBj6Z9Tb",
+    "8BEanxaCfb","e2ZQwSNEXD","Fe4YKRHTgC","Fg42XDPpbS","kNJ2BM4MnV","JwcAjpxXcq",
+    "uXk2ySjv2q","KK5sp4WVEc","UCtG6kUak4","Jwr3gAqw7x","dSqRrc4P98","yCUQGNsxee",
+    "bRKr5E85pt","K65BhmZwbD","9kRGYtaXYs","MjRPprKmCq","nvE9p3aQa8","AGssspWCjw",
+    "qxnPmsRQMF","xxXPPdfUKw","5kR82Eu97Y"
+  ];
+
   // Loaded once, lazily, the first time a sprite icon is needed.
   let sheetSize = null; // {w, h} natural pixel size of monsterlist.png
   let sheetLoading = null;
@@ -544,6 +611,26 @@
     });
   }
 
+  function renderDiscord(){
+    const gridEl = document.getElementById("discord-grid");
+    gridEl.innerHTML = "";
+    discordCodes.forEach((code, i) => {
+      const a = document.createElement("a");
+      a.className = "server-card";
+      a.href = "https://discord.gg/" + code;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.innerHTML = `
+        <span class="icon-box"><img src="discordservericon.png" alt=""></span>
+        <span class="s-num">Server ${i + 1}</span>
+        <span class="s-code">discord.gg/${code}</span>
+        <span class="s-join">Join</span>
+      `;
+      gridEl.appendChild(a);
+    });
+    document.getElementById("discord-count").textContent = discordCodes.length + " servers";
+  }
+
   function openModal(entity){
     const iconSlot = document.getElementById("modal-icon");
     iconSlot.innerHTML = "";
@@ -589,7 +676,7 @@
   }
 
   /* =========================================================
-     Top-level panels (Monsters / Bosses) + "pick an option" hint
+     Top-level panels (Monsters / Bosses / Discord) + "pick an option" hint
      ========================================================= */
   const overlay = document.getElementById("overlay");
   const btnClose = document.getElementById("btn-close");
@@ -626,6 +713,7 @@
 
   renderMonsters();
   renderBosses();
+  renderDiscord();
 
   /* =========================================================
      Hint carousel: cycles through the top-bar options one at a
@@ -635,7 +723,8 @@
      ========================================================= */
   const hintOptions = [
     { icon: "monsterbutton.png", label: "Monsters" },
-    { icon: "bossicon.png",      label: "Bosses" }
+    { icon: "bossicon.png",      label: "Bosses" },
+    { icon: "discord.png",       label: "Discord" }
   ];
 
   const carousel = document.getElementById("hint-carousel");
